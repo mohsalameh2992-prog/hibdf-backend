@@ -38,7 +38,7 @@ from google.auth.transport import requests as google_requests
 
 from converter import PDFConverter
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 # ─────────────────────────────────────────────
 # App Configuration
@@ -2039,52 +2039,6 @@ def rate_limit_exceeded(e):
 def init_db():
     with app.app_context():
         db.create_all()
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE app_users ADD COLUMN bonus_conversions INTEGER DEFAULT 0'))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            
-        # Try adding auto_renew
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE app_users ADD COLUMN auto_renew BOOLEAN DEFAULT 1'))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            
-        # Try adding paddle_subscription_id
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE app_users ADD COLUMN paddle_subscription_id VARCHAR(100)'))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            
-        # Try adding paddle_cancel_url
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE app_users ADD COLUMN paddle_cancel_url VARCHAR(500)'))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-
-        # Try adding params to conversions
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE conversions ADD COLUMN params TEXT'))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-
-        # Try adding email to conversions
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE conversions ADD COLUMN email VARCHAR(255)'))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
 
         # Create default admin
         try:

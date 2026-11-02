@@ -1458,6 +1458,7 @@ class PDFConverter:
             models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]
             success = False
             content_text = ""
+            _api_keys_list = [k.strip() for k in re.split(r"[,;\s]+", api_key) if k.strip()] if api_key else []
             
             for model_name in models_to_try:
                 current_key = get_next_api_key(api_key) or api_key
@@ -1499,7 +1500,7 @@ class PDFConverter:
                                     logger.warning(f"Model {model_name} quota exhausted on key ...{current_key[-4:] if current_key else ''}.")
                                     if len(_api_keys_list) > 1:
                                         logger.info("Multiple keys available. Switching to next key immediately...")
-                                        current_key = get_next_api_key(api_key, _api_keys_list) or api_key
+                                        current_key = get_next_api_key(api_key) or api_key
                                         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={current_key}"
                                         continue # Retry immediately with the new key!
                                     else:
