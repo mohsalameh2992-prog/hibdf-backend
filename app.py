@@ -1834,6 +1834,11 @@ def create_admin():
 
 _last_client_alert = {'t': 0.0}
 
+@app.route('/api/stats', methods=['GET'])
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'ok', 'service': 'hibdf-backend'}), 200
+
 @app.route('/api/client-alert', methods=['POST'])
 def client_alert():
     """Relay frontend error alerts to Telegram. Token stays server-side (env TELEGRAM_BOT_TOKEN)."""
