@@ -1832,6 +1832,32 @@ def create_admin():
 # Webhooks
 # ─────────────────────────────────────────────
 
+_last_client_alert = {'t': 0.0}
+
+@app.route('/api/client-alert', methods=['POST'])
+def client_alert():
+    """Relay frontend error alerts to Telegram. Token stays server-side (env TELEGRAM_BOT_TOKEN)."""
+    import time as _time
+    import urllib.request as _ur
+    import urllib.parse as _up
+    token = os.getenv('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.getenv('TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        return jsonify({'ok': False}), 200
+    now = _time.time()
+    if now - _last_client_alert['t'] < 30:  # simple global rate limit
+        return jsonify({'ok': False, 'throttled': True}), 200
+    _last_client_alert['t'] = now
+    data = request.get_json(silent=True) or {}
+    reason = str(data.get('reason', ''))[:300]
+    msg = "\U0001F6A8 hibdf alert\n" + reason
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage?" + _up.urlencode({'chat_id': chat_id, 'text': msg})
+        _ur.urlopen(url, timeout=5)
+    except Exception as e:
+        logger.warning(f"client_alert telegram failed: {e}")
+    return jsonify({'ok': True}), 200
+
 @app.route('/api/paddle/webhook', methods=['POST'])
 def paddle_webhook():
     try:
